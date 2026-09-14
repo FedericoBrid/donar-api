@@ -1,4 +1,4 @@
-package com.donar.api.user.entity;
+package com.donar.api.user.enums;
 
 public enum Gender {
     MALE,

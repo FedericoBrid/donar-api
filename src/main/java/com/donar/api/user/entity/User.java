@@ -2,6 +2,7 @@ package com.donar.api.user.entity;
 
 import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.rhfactor.entity.RhFactor;
+import com.donar.api.user.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
