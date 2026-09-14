@@ -21,18 +21,42 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Column(name = "password", nullable = false)
     private String password;
-    private String gender;
-    private String status;
+
+    @Column(name = "status", nullable = false)
+    private Boolean status;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    private BloodType bloodTypeId;
-    private RhFactor rhFactorId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = false)
+    private Gender gender;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "blood_type_id", referencedColumnName = "id", nullable = false)
+    private BloodType bloodType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "rh_factor_id", referencedColumnName = "id", nullable = false)
+    private RhFactor rhFactor;
 }
