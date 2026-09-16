@@ -2,7 +2,6 @@ package com.donar.api.bloodtype.service;
 
 import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.bloodtype.repository.IBloodTypeRepository;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
