@@ -4,12 +4,18 @@ import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.bloodtype.repository.IBloodTypeRepository;
 import com.donar.api.rhfactor.entity.RhFactor;
 import com.donar.api.rhfactor.repository.IRhFactorRepository;
+import com.donar.api.role.entity.Role;
+import com.donar.api.role.repository.IRoleRepository;
 import com.donar.api.user.dto.CreateUserRequest;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.repository.IUserRepository;
+import com.donar.api.userrole.entity.UserRole;
+import com.donar.api.userrole.repository.IUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,6 +26,8 @@ public class UserService {
     private final IUserRepository userRepository;
     private final IBloodTypeRepository bloodTypeRepository;
     private final IRhFactorRepository rhFactorRepository;
+    private final IRoleRepository roleRepository;
+    private final IUserRoleRepository userRoleRepository;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -37,6 +45,7 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    @Transactional
     public User create(CreateUserRequest requestDto){
         if (existsByEmail(requestDto.email())) {
             throw new RuntimeException("Email already exists");
@@ -44,6 +53,7 @@ public class UserService {
 
         BloodType bloodType = bloodTypeRepository.findById(requestDto.bloodTypeId()).orElseThrow(() -> new RuntimeException("Blood type not found"));
         RhFactor rhFactor = rhFactorRepository.findById(requestDto.rhFactorId()).orElseThrow(() -> new RuntimeException("Rh factor not found"));
+        Role userRole = roleRepository.findByName("USER").orElseThrow(() -> new RuntimeException("User role not found"));
 
         User user = User.builder()
                 .firstName(requestDto.firstName())
@@ -59,6 +69,17 @@ public class UserService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        UserRole userRoleAssignment = UserRole.builder()
+                .user(savedUser)
+                .role(userRole)
+                .validFrom(LocalDate.now())
+                .status(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        userRoleRepository.save(userRoleAssignment);
+        return savedUser;
     }
 }
