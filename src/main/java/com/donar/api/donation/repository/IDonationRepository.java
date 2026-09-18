@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface IDonationRepository extends JpaRepository<Donation, Long> {
     List<Donation> findByBloodRequest_Id(Long bloodRequestId);
-
     List<Donation> findByUser_Id(Long userId);
     Optional<Donation> findByUser_IdAndStatus(Long userId, DonationStatus status);
 }
