@@ -12,6 +12,7 @@ import com.donar.api.user.repository.IUserRepository;
 import com.donar.api.userrole.entity.UserRole;
 import com.donar.api.userrole.repository.IUserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class UserService {
     private final IRhFactorRepository rhFactorRepository;
     private final IRoleRepository roleRepository;
     private final IUserRoleRepository userRoleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -60,8 +62,7 @@ public class UserService {
                 .lastName(requestDto.lastName())
                 .birthDate(requestDto.birthDate())
                 .email(requestDto.email())
-                //password for the moment, without spring security
-                .password(requestDto.password())
+                .password(passwordEncoder.encode(requestDto.password()))
                 .gender(requestDto.gender())
                 .bloodType(bloodType)
                 .rhFactor(rhFactor)
