@@ -107,4 +107,16 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    @Transactional
+    public User deactivate(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setStatus(false);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
 }

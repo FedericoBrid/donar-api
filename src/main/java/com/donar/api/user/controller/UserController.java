@@ -36,9 +36,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserResponse findById(@PathVariable Long id) {
-
         User user = userService.findById(id);
-
         return toResponse(user);
     }
 
@@ -49,8 +47,14 @@ public class UserController {
         return toResponse(user);
     }
 
-    private UserResponse toResponse(User user) {
+    //maybe later we will implement a /status for activate and deactivate, but for now we will just implement deactivate
+    @PatchMapping("/{id}/deactivate")
+    public UserResponse deactivate(@PathVariable Long id) {
+        User user = userService.deactivate(id);
+        return toResponse(user);
+    }
 
+    private UserResponse toResponse(User user) {
         return new UserResponse(
                 user.getId(),
                 user.getFirstName(),
