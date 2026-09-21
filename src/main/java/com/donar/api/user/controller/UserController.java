@@ -1,6 +1,7 @@
 package com.donar.api.user.controller;
 
 import com.donar.api.user.dto.CreateUserRequest;
+import com.donar.api.user.dto.UpdateUserRequest;
 import com.donar.api.user.dto.UserResponse;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.service.UserService;
@@ -38,6 +39,13 @@ public class UserController {
 
         User user = userService.findById(id);
 
+        return toResponse(user);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse update(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+        User user = userService.update(id, updateUserRequest);
         return toResponse(user);
     }
 

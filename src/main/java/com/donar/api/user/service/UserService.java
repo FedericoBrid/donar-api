@@ -7,6 +7,7 @@ import com.donar.api.rhfactor.repository.IRhFactorRepository;
 import com.donar.api.role.entity.Role;
 import com.donar.api.role.repository.IRoleRepository;
 import com.donar.api.user.dto.CreateUserRequest;
+import com.donar.api.user.dto.UpdateUserRequest;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.repository.IUserRepository;
 import com.donar.api.userrole.entity.UserRole;
@@ -82,5 +83,28 @@ public class UserService {
 
         userRoleRepository.save(userRoleAssignment);
         return savedUser;
+    }
+
+    @Transactional
+    public User update(Long id, UpdateUserRequest requestDto) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BloodType bloodType = bloodTypeRepository.findById(requestDto.bloodTypeId())
+                .orElseThrow(() -> new RuntimeException("Blood type not found"));
+
+        RhFactor rhFactor = rhFactorRepository.findById(requestDto.rhFactorId())
+                .orElseThrow(() -> new RuntimeException("Rh factor not found"));
+
+        user.setFirstName(requestDto.firstName());
+        user.setLastName(requestDto.lastName());
+        user.setBirthDate(requestDto.birthDate());
+        user.setGender(requestDto.gender());
+        user.setBloodType(bloodType);
+        user.setRhFactor(rhFactor);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
     }
 }
