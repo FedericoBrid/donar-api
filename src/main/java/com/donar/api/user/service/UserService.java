@@ -2,6 +2,8 @@ package com.donar.api.user.service;
 
 import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.bloodtype.repository.IBloodTypeRepository;
+import com.donar.api.common.exception.DuplicateResourceException;
+import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.rhfactor.entity.RhFactor;
 import com.donar.api.rhfactor.repository.IRhFactorRepository;
 import com.donar.api.role.entity.Role;
@@ -37,11 +39,11 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     public boolean existsByEmail(String email) {
@@ -51,12 +53,12 @@ public class UserService {
     @Transactional
     public User create(CreateUserRequest requestDto){
         if (existsByEmail(requestDto.email())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
 
-        BloodType bloodType = bloodTypeRepository.findById(requestDto.bloodTypeId()).orElseThrow(() -> new RuntimeException("Blood type not found"));
-        RhFactor rhFactor = rhFactorRepository.findById(requestDto.rhFactorId()).orElseThrow(() -> new RuntimeException("Rh factor not found"));
-        Role userRole = roleRepository.findByName("USER").orElseThrow(() -> new RuntimeException("User role not found"));
+        BloodType bloodType = bloodTypeRepository.findById(requestDto.bloodTypeId()).orElseThrow(() -> new ResourceNotFoundException("Blood type not found"));
+        RhFactor rhFactor = rhFactorRepository.findById(requestDto.rhFactorId()).orElseThrow(() -> new ResourceNotFoundException("Rh factor not found"));
+        Role userRole = roleRepository.findByName("USER").orElseThrow(() -> new ResourceNotFoundException("User role not found"));
 
         User user = User.builder()
                 .firstName(requestDto.firstName())
@@ -89,13 +91,13 @@ public class UserService {
     public User update(Long id, UpdateUserRequest requestDto) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         BloodType bloodType = bloodTypeRepository.findById(requestDto.bloodTypeId())
-                .orElseThrow(() -> new RuntimeException("Blood type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Blood type not found"));
 
         RhFactor rhFactor = rhFactorRepository.findById(requestDto.rhFactorId())
-                .orElseThrow(() -> new RuntimeException("Rh factor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Rh factor not found"));
 
         user.setFirstName(requestDto.firstName());
         user.setLastName(requestDto.lastName());
@@ -112,7 +114,7 @@ public class UserService {
     public User deactivate(Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setStatus(false);
         user.setUpdatedAt(LocalDateTime.now());
