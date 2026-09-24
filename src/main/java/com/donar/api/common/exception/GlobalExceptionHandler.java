@@ -52,4 +52,24 @@ public class GlobalExceptionHandler {
                 errors
         );
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidCredentials(InvalidCredentialsException exception) {
+
+        return new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InactiveUserException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleInactiveUser(InactiveUserException exception) {
+
+        return new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                exception.getMessage()
+        );
+    }
 }
