@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final IUserRoleRepository userRoleRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
@@ -29,13 +31,32 @@ public class CustomUserDetailsService implements UserDetailsService {
                         new UsernameNotFoundException("Usuario no encontrado")
                 );
 
+        return buildUserDetails(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserDetails loadUserById(Long userId)
+            throws UsernameNotFoundException {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "Usuario no encontrado"
+                        )
+                );
+        return buildUserDetails(user);
+    }
+
+    private UserDetails buildUserDetails(User user) {
+
         List<UserRole> userRoles =
                 userRoleRepository.findByUser_IdAndStatusTrue(user.getId());
 
         List<SimpleGrantedAuthority> authorities = userRoles.stream()
                 .map(userRole ->
                         new SimpleGrantedAuthority(
-                                "ROLE_" + userRole.getRole().getName().toUpperCase()
+                                "ROLE_" +
+                                        userRole.getRole().getName().toUpperCase()
                         )
                 )
                 .toList();
