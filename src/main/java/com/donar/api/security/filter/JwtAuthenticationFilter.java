@@ -1,6 +1,6 @@
 package com.donar.api.security.filter;
 
-import com.donar.api.security.config.JwtService;
+import com.donar.api.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

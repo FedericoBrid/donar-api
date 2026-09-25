@@ -4,7 +4,7 @@ import com.donar.api.auth.dto.AuthResponse;
 import com.donar.api.auth.dto.LoginRequest;
 import com.donar.api.common.exception.InactiveUserException;
 import com.donar.api.common.exception.InvalidCredentialsException;
-import com.donar.api.security.config.JwtService;
+import com.donar.api.security.service.JwtService;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
