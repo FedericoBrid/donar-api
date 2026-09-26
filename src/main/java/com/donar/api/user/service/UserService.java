@@ -79,6 +79,7 @@ public class UserService {
                 .role(userRole)
                 .status(true)
                 .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         userRoleRepository.save(userRoleAssignment);
