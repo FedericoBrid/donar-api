@@ -6,7 +6,6 @@ import com.donar.api.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,12 +29,6 @@ public class UserRole {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
-
-    @Column(name = "valid_from", nullable = false)
-    private LocalDate validFrom;
-
-    @Column(name = "valid_to")
-    private LocalDate validTo;
 
     @Column(name = "status", nullable = false)
     private Boolean status;

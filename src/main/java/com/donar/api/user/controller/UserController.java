@@ -5,6 +5,7 @@ import com.donar.api.user.dto.UpdateUserRequest;
 import com.donar.api.user.dto.UserResponse;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.service.UserService;
+import com.donar.api.userrole.service.UserRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserRoleService userRoleService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

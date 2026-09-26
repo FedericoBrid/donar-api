@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -78,7 +77,6 @@ public class UserService {
         UserRole userRoleAssignment = UserRole.builder()
                 .user(savedUser)
                 .role(userRole)
-                .validFrom(LocalDate.now())
                 .status(true)
                 .createdAt(LocalDateTime.now())
                 .build();
