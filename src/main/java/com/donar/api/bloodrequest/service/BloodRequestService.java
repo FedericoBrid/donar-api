@@ -127,4 +127,38 @@ public class BloodRequestService {
 
         return bloodRequestRepository.save(bloodRequest);
     }
+
+    @Transactional
+    public BloodRequest fulfill(Long id) {
+
+        BloodRequest bloodRequest =
+                bloodRequestRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Blood request not found"
+                                )
+                        );
+
+        bloodRequest.setStatus(RequestStatus.FULFILLED);
+        bloodRequest.setUpdatedAt(LocalDateTime.now());
+
+        return bloodRequestRepository.save(bloodRequest);
+    }
+
+    @Transactional
+    public BloodRequest cancel(Long id) {
+
+        BloodRequest bloodRequest =
+                bloodRequestRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Blood request not found"
+                                )
+                        );
+
+        bloodRequest.setStatus(RequestStatus.CANCELLED);
+        bloodRequest.setUpdatedAt(LocalDateTime.now());
+
+        return bloodRequestRepository.save(bloodRequest);
+    }
 }

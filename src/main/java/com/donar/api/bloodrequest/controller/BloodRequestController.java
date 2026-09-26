@@ -79,4 +79,16 @@ public class BloodRequestController {
                 bloodRequest.getUpdatedAt()
         );
     }
+
+    @PatchMapping("/{id}/fulfill")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HEMOADMIN')")
+    public BloodRequestResponse fulfill(@PathVariable Long id) {
+        return toResponse(bloodRequestService.fulfill(id));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HEMOADMIN')")
+    public BloodRequestResponse cancel(@PathVariable Long id) {
+        return toResponse(bloodRequestService.cancel(id));
+    }
 }
