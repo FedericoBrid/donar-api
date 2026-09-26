@@ -5,11 +5,11 @@ import com.donar.api.user.dto.UpdateUserRequest;
 import com.donar.api.user.dto.UserResponse;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.service.UserService;
-import com.donar.api.userrole.service.UserRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +20,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final UserRoleService userRoleService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,11 +38,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse findById(@PathVariable Long id) {
         User user = userService.findById(id);
         return toResponse(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponse update(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest) {
@@ -51,10 +52,27 @@ public class UserController {
         return toResponse(user);
     }
 
-    //maybe later we will implement a /status for activate and deactivate, but for now we will just implement deactivate
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/deactivate")
     public UserResponse deactivate(@PathVariable Long id) {
         User user = userService.deactivate(id);
+        return toResponse(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/activate")
+    public UserResponse activate(@PathVariable Long id) {
+        User user = userService.activate(id);
+        return toResponse(user);
+    }
+
+    @GetMapping("/me")
+    public UserResponse me(Authentication authentication) {
+
+        Long userId = (Long) authentication.getDetails();
+
+        User user = userService.findById(userId);
+
         return toResponse(user);
     }
 

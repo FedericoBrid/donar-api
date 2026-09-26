@@ -119,4 +119,15 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    @Transactional
+    public User activate(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setStatus(true);
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
+    }
 }
