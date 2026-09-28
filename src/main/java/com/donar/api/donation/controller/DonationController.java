@@ -1,7 +1,10 @@
 package com.donar.api.donation.controller;
 
+import com.donar.api.bloodcenter.entity.BloodCenter;
+import com.donar.api.bloodrequest.entity.BloodRequest;
 import com.donar.api.donation.dto.CreateDonationRequest;
 import com.donar.api.donation.dto.DonationResponse;
+import com.donar.api.donation.dto.MyDonationResponse;
 import com.donar.api.donation.entity.Donation;
 import com.donar.api.donation.service.DonationService;
 import jakarta.validation.Valid;
@@ -10,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/donations")
@@ -46,6 +51,49 @@ public class DonationController {
 
         return toResponse(
                 donationService.complete(id)
+        );
+    }
+
+    @GetMapping("/my")
+    public List<MyDonationResponse> findMyDonations(
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return donationService.findByUserId(userId)
+                .stream()
+                .map(this::toMyDonationResponse)
+                .toList();
+    }
+
+    private MyDonationResponse toMyDonationResponse(Donation donation) {
+
+        BloodRequest bloodRequest = donation.getBloodRequest();
+        BloodCenter bloodCenter = bloodRequest.getBloodCenter();
+
+        return new MyDonationResponse(
+                donation.getId(),
+                bloodRequest.getId(),
+
+                bloodRequest.getBloodType().getName(),
+                bloodRequest.getRhFactor().getName(),
+
+                bloodRequest.getUrgency(),
+                bloodRequest.getStatus(),
+
+                donation.getStatus(),
+
+                bloodRequest.getExpirationDate(),
+
+                bloodCenter.getId(),
+                bloodCenter.getName(),
+                bloodCenter.getAddress(),
+                bloodCenter.getPhone(),
+                bloodCenter.getEmail(),
+
+                donation.getRegisteredAt(),
+                donation.getDonatedAt(),
+                donation.getUpdatedAt()
         );
     }
 

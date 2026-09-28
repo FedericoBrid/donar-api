@@ -4,6 +4,7 @@ import com.donar.api.bloodrequest.entity.BloodRequest;
 import com.donar.api.bloodrequest.enums.RequestStatus;
 import com.donar.api.bloodrequest.repository.IBloodRequestRepository;
 import com.donar.api.common.exception.DuplicateResourceException;
+import com.donar.api.common.exception.InvalidStateException;
 import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.donation.dto.CreateDonationRequest;
 import com.donar.api.donation.entity.Donation;
@@ -12,11 +13,13 @@ import com.donar.api.donation.repository.IDonationRepository;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +28,10 @@ public class DonationService {
     private final IDonationRepository donationRepository;
     private final IUserRepository userRepository;
     private final IBloodRequestRepository bloodRequestRepository;
+    @Value("${donation.recovery-days}")
+    private long recoveryDays;
 
-    public List<Donation> findByBloodRequestId(Long bloodRequestId) {
-        return donationRepository.findByBloodRequest_Id(bloodRequestId);
-    }
-
+    @Transactional(readOnly = true)
     public List<Donation> findByUserId(Long userId) {
         return donationRepository.findByUser_Id(userId);
     }
@@ -52,6 +54,12 @@ public class DonationService {
 
         if (hasRegisteredDonation(userId)) {
             throw new DuplicateResourceException("User already has a registered donation");
+        }
+
+        if (!isEligibleToDonate(userId)) {
+            throw new IllegalStateException(
+                    "User is not eligible to donate yet"
+            );
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -101,7 +109,7 @@ public class DonationService {
                 );
 
         if (donation.getStatus() != DonationStatus.REGISTERED) {
-            throw new IllegalStateException(
+            throw new InvalidStateException(
                     "Donation cannot be completed"
             );
         }
@@ -115,4 +123,23 @@ public class DonationService {
         return donationRepository.save(donation);
     }
 
+    public boolean isEligibleToDonate(Long userId) {
+
+        Optional<Donation> lastCompletedDonation =
+                donationRepository.findFirstByUser_IdAndStatusOrderByDonatedAtDesc(
+                        userId,
+                        DonationStatus.COMPLETED
+                );
+
+        if (lastCompletedDonation.isEmpty()) {
+            return true;
+        }
+
+        Donation donation = lastCompletedDonation.get();
+
+        LocalDateTime eligibleAt =
+                donation.getDonatedAt().plusDays(recoveryDays);
+
+        return !LocalDateTime.now().isBefore(eligibleAt);
+    }
 }
