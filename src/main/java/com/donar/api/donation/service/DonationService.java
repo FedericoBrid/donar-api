@@ -66,4 +66,53 @@ public class DonationService {
         return donationRepository.save(donation);
     }
 
+    @Transactional
+    public Donation cancel(Long donationId, Long userId) {
+
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Donation not found")
+                );
+
+        // The user can only cancel their own registration.
+        if (!donation.getUser().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Donation not found");
+        }
+
+        // Only an active registration can be cancelled.
+        if (donation.getStatus() != DonationStatus.REGISTERED) {
+            throw new IllegalStateException(
+                    "Donation cannot be cancelled"
+            );
+        }
+
+        donation.setStatus(DonationStatus.CANCELLED);
+        donation.setUpdatedAt(LocalDateTime.now());
+
+        return donationRepository.save(donation);
+    }
+
+    @Transactional
+    public Donation complete(Long donationId) {
+
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Donation not found")
+                );
+
+        if (donation.getStatus() != DonationStatus.REGISTERED) {
+            throw new IllegalStateException(
+                    "Donation cannot be completed"
+            );
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        donation.setStatus(DonationStatus.COMPLETED);
+        donation.setDonatedAt(now);
+        donation.setUpdatedAt(now);
+
+        return donationRepository.save(donation);
+    }
+
 }
