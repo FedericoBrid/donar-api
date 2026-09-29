@@ -7,6 +7,7 @@ import com.donar.api.donation.dto.DonationResponse;
 import com.donar.api.donation.dto.MyDonationResponse;
 import com.donar.api.donation.entity.Donation;
 import com.donar.api.donation.service.DonationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/donations")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class DonationController {
 

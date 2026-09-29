@@ -6,6 +6,7 @@ import com.donar.api.bloodrequest.dto.UpdateBloodRequest;
 import com.donar.api.bloodrequest.entity.BloodRequest;
 import com.donar.api.bloodrequest.enums.RequestStatus;
 import com.donar.api.bloodrequest.service.BloodRequestService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/blood-requests")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class BloodRequestController {
 
