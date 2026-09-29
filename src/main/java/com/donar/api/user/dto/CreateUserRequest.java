@@ -1,10 +1,7 @@
 package com.donar.api.user.dto;
 
 import com.donar.api.user.enums.Gender;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
@@ -25,6 +22,7 @@ public record CreateUserRequest(
         String email,
 
         @NotBlank(message = "Password is required")
+        @Size(min = 8, message = "Password must contain at least 8 characters")
         String password,
 
         @NotNull(message = "Gender is required")

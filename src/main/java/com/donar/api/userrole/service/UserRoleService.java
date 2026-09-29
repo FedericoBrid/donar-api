@@ -11,9 +11,9 @@ import com.donar.api.userrole.dto.AssignRoleRequest;
 import com.donar.api.userrole.dto.UserRoleResponse;
 import com.donar.api.userrole.entity.UserRole;
 import com.donar.api.userrole.repository.IUserRoleRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -32,9 +32,13 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**")
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/api/v1/users"
+                        )
                         .permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .addFilterBefore(
                         jwtAuthenticationFilter,

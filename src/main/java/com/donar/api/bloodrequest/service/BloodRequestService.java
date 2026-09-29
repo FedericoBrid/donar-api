@@ -9,6 +9,7 @@ import com.donar.api.bloodrequest.enums.RequestStatus;
 import com.donar.api.bloodrequest.repository.IBloodRequestRepository;
 import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.bloodtype.repository.IBloodTypeRepository;
+import com.donar.api.common.exception.InvalidStateException;
 import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.rhfactor.entity.RhFactor;
 import com.donar.api.rhfactor.repository.IRhFactorRepository;
@@ -46,26 +47,21 @@ public class BloodRequestService {
         BloodCenter bloodCenter =
                 bloodCenterRepository.findById(request.bloodCenterId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood center not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood center not found"));
+
+        if (!Boolean.TRUE.equals(bloodCenter.getStatus())) {
+            throw new InvalidStateException("Blood center is inactive");
+        }
 
         BloodType bloodType =
                 bloodTypeRepository.findById(request.bloodTypeId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood type not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood type not found"));
 
         RhFactor rhFactor =
                 rhFactorRepository.findById(request.rhFactorId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Rh factor not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Rh factor not found"));
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -76,7 +72,6 @@ public class BloodRequestService {
         bloodRequest.setRhFactor(rhFactor);
         bloodRequest.setUrgency(request.urgency());
         bloodRequest.setExpirationDate(request.expirationDate());
-
         bloodRequest.setStatus(RequestStatus.ACTIVE);
         bloodRequest.setCreatedAt(now);
 
@@ -89,34 +84,32 @@ public class BloodRequestService {
         BloodRequest bloodRequest =
                 bloodRequestRepository.findById(id)
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood request not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood request not found"));
+
+        if (bloodRequest.getStatus() != RequestStatus.ACTIVE) {
+            throw new InvalidStateException(
+                    "Blood request is not active"
+            );
+        }
 
         BloodCenter bloodCenter =
                 bloodCenterRepository.findById(request.bloodCenterId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood center not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood center not found"));
+
+        if (!Boolean.TRUE.equals(bloodCenter.getStatus())) {
+            throw new InvalidStateException("Blood center is inactive");
+        }
 
         BloodType bloodType =
                 bloodTypeRepository.findById(request.bloodTypeId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood type not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood type not found"));
 
         RhFactor rhFactor =
                 rhFactorRepository.findById(request.rhFactorId())
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Rh factor not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Rh factor not found"));
 
         bloodRequest.setBloodCenter(bloodCenter);
         bloodRequest.setBloodType(bloodType);
@@ -134,10 +127,11 @@ public class BloodRequestService {
         BloodRequest bloodRequest =
                 bloodRequestRepository.findById(id)
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood request not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood request not found"));
+
+        if (bloodRequest.getStatus() != RequestStatus.ACTIVE) {
+            throw new InvalidStateException("Blood request is not active");
+        }
 
         bloodRequest.setStatus(RequestStatus.FULFILLED);
         bloodRequest.setUpdatedAt(LocalDateTime.now());
@@ -151,10 +145,11 @@ public class BloodRequestService {
         BloodRequest bloodRequest =
                 bloodRequestRepository.findById(id)
                         .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Blood request not found"
-                                )
-                        );
+                                new ResourceNotFoundException("Blood request not found"));
+
+        if (bloodRequest.getStatus() != RequestStatus.ACTIVE) {
+            throw new InvalidStateException("Blood request is not active");
+        }
 
         bloodRequest.setStatus(RequestStatus.CANCELLED);
         bloodRequest.setUpdatedAt(LocalDateTime.now());

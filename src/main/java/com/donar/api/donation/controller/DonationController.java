@@ -55,14 +55,21 @@ public class DonationController {
     }
 
     @GetMapping("/my")
-    public List<MyDonationResponse> findMyDonations(
-            Authentication authentication
-    ) {
+    public List<MyDonationResponse> findMyDonations(Authentication authentication) {
         Long userId = (Long) authentication.getDetails();
 
         return donationService.findByUserId(userId)
                 .stream()
                 .map(this::toMyDonationResponse)
+                .toList();
+    }
+
+    @GetMapping("/blood-request/{bloodRequestId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HEMOADMIN')")
+    public List<DonationResponse> findByBloodRequest(@PathVariable Long bloodRequestId) {
+        return donationService.findByBloodRequestId(bloodRequestId)
+                .stream()
+                .map(this::toResponse)
                 .toList();
     }
 

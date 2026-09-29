@@ -67,7 +67,7 @@ public class PasswordResetService {
         passwordResetRepository.save(passwordReset);
     }
 
-
+    @Transactional(readOnly = true)
     public PasswordReset findValidToken(String token) {
         PasswordReset passwordReset = passwordResetRepository
                 .findByTokenAndUsedFalse(token)
