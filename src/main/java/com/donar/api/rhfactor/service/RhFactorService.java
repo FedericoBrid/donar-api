@@ -1,5 +1,6 @@
 package com.donar.api.rhfactor.service;
 
+import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.rhfactor.entity.RhFactor;
 import com.donar.api.rhfactor.repository.IRhFactorRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,6 @@ public class RhFactorService {
     }
 
     public RhFactor findById(Long id) {
-        return rhFactorRepository.findById(id).orElseThrow(() -> new RuntimeException("Rh factor not found with id: " + id));
+        return rhFactorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Rh factor not found with id: " + id));
     }
 }

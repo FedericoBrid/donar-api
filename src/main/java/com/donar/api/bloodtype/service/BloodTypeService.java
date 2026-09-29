@@ -2,6 +2,7 @@ package com.donar.api.bloodtype.service;
 
 import com.donar.api.bloodtype.entity.BloodType;
 import com.donar.api.bloodtype.repository.IBloodTypeRepository;
+import com.donar.api.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,6 @@ public class BloodTypeService {
     }
 
     public BloodType findById(Long id) {
-        return bloodTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Blood type not found with id: " + id));
+        return bloodTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Blood type not found with id: " + id));
     }
 }

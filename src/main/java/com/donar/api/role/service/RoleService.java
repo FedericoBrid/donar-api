@@ -1,5 +1,6 @@
 package com.donar.api.role.service;
 
+import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.role.entity.Role;
 import com.donar.api.role.repository.IRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,6 @@ public class RoleService {
     }
 
     public Role findById(Long id)  {
-        return roleRepository.findById(id).orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
+        return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + id));
     }
 }
