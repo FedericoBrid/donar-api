@@ -28,6 +28,7 @@ public class DonationService {
     private final IDonationRepository donationRepository;
     private final IUserRepository userRepository;
     private final IBloodRequestRepository bloodRequestRepository;
+
     @Value("${donation.recovery-days}")
     private long recoveryDays;
 
@@ -36,30 +37,49 @@ public class DonationService {
         return donationRepository.findByUser_Id(userId);
     }
 
-    public boolean hasRegisteredDonation(Long userId) {
-        return donationRepository.findByUser_IdAndStatus(userId, DonationStatus.REGISTERED).isPresent();
+    @Transactional(readOnly = true)
+    public List<Donation> findByBloodRequestId(Long bloodRequestId) {
+
+        if (!bloodRequestRepository.existsById(bloodRequestId)) {throw new ResourceNotFoundException("Blood request not found");
+        }
+
+        return donationRepository.findByBloodRequest_Id(bloodRequestId);
     }
 
     @Transactional
-    public Donation create(Long userId, CreateDonationRequest request){
+    public Donation create(
+            Long userId,
+            CreateDonationRequest request) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        BloodRequest bloodRequest = bloodRequestRepository.findById(request.bloodRequestId())
+        BloodRequest bloodRequest =
+                bloodRequestRepository.findById(request.bloodRequestId())
                         .orElseThrow(() -> new ResourceNotFoundException("Blood request not found"));
 
+        /*
+         * A donation can only be registered
+         * for an active blood request.
+         */
         if (bloodRequest.getStatus() != RequestStatus.ACTIVE) {
-            throw new IllegalStateException("Blood request is not active");
+            throw new InvalidStateException("Blood request is not active");
         }
 
+        /*
+         * A user can only have one active
+         * donation registration at a time.
+         */
         if (hasRegisteredDonation(userId)) {
             throw new DuplicateResourceException("User already has a registered donation");
         }
 
+        /*
+         * After completing a donation,
+         * the user must wait for the recovery period.
+         */
         if (!isEligibleToDonate(userId)) {
-            throw new IllegalStateException(
-                    "User is not eligible to donate yet"
-            );
+            throw new InvalidStateException("User is not eligible to donate yet");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -70,28 +90,31 @@ public class DonationService {
         donation.setBloodRequest(bloodRequest);
         donation.setStatus(DonationStatus.REGISTERED);
         donation.setRegisteredAt(now);
+        donation.setUpdatedAt(now);
 
         return donationRepository.save(donation);
     }
 
     @Transactional
-    public Donation cancel(Long donationId, Long userId) {
+    public Donation cancel(
+            Long donationId,
+            Long userId) {
 
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Donation not found")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
 
-        // The user can only cancel their own registration.
+        /*
+         * A user can only cancel their own donation.
+         */
         if (!donation.getUser().getId().equals(userId)) {
             throw new ResourceNotFoundException("Donation not found");
         }
 
-        // Only an active registration can be cancelled.
+        /*
+         * Only a registered donation can be cancelled.
+         */
         if (donation.getStatus() != DonationStatus.REGISTERED) {
-            throw new IllegalStateException(
-                    "Donation cannot be cancelled"
-            );
+            throw new InvalidStateException("Donation cannot be cancelled");
         }
 
         donation.setStatus(DonationStatus.CANCELLED);
@@ -104,14 +127,13 @@ public class DonationService {
     public Donation complete(Long donationId) {
 
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Donation not found")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
 
+        /*
+         * Only a registered donation can be completed.
+         */
         if (donation.getStatus() != DonationStatus.REGISTERED) {
-            throw new InvalidStateException(
-                    "Donation cannot be completed"
-            );
+            throw new InvalidStateException("Donation cannot be completed");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -123,13 +145,24 @@ public class DonationService {
         return donationRepository.save(donation);
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasRegisteredDonation(Long userId) {
+
+        return donationRepository.existsByUser_IdAndStatus(
+                userId,
+                DonationStatus.REGISTERED
+        );
+    }
+
+    @Transactional(readOnly = true)
     public boolean isEligibleToDonate(Long userId) {
 
         Optional<Donation> lastCompletedDonation =
-                donationRepository.findFirstByUser_IdAndStatusOrderByDonatedAtDesc(
-                        userId,
-                        DonationStatus.COMPLETED
-                );
+                donationRepository
+                        .findFirstByUser_IdAndStatusAndDonatedAtIsNotNullOrderByDonatedAtDesc(
+                                userId,
+                                DonationStatus.COMPLETED
+                        );
 
         if (lastCompletedDonation.isEmpty()) {
             return true;
