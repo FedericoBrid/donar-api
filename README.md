@@ -499,14 +499,8 @@ Frontend repository:
 Planned improvements include:
 
 * React frontend
-* Automatic blood request expiration
 * Flyway database migrations
 * Dockerization
-* Refresh tokens
-* Production configuration
-* Improved logging and observability
-* Application deployment
-* Automated testing
 
 ---
 
