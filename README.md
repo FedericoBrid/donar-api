@@ -1,30 +1,14 @@
 # Donar+ API
 
-API REST para la gestión de donaciones de sangre, usuarios, hemocentros, solicitudes de sangre y donaciones.
+REST API for blood donation management built with Java, Spring Boot, Spring Security and MySQL.
 
-El proyecto forma parte de la reconstrucción de **Donar+**, originalmente desarrollado con PHP, utilizando una arquitectura moderna basada en **Spring Boot + Spring Security + JWT + MySQL**.
+This project is the backend of **Donar+**, a blood donation management platform originally developed with PHP/MVC and later rebuilt using a modern REST architecture.
 
----
-
-## 📋 Descripción
-
-Donar+ permite gestionar el proceso de donación de sangre mediante una API REST segura.
-
-La aplicación contempla diferentes perfiles de usuario y permite administrar:
-
-* Usuarios
-* Roles y permisos
-* Hemocentros
-* Solicitudes de sangre
-* Donaciones
-* Recuperación de contraseña
-* Autenticación mediante JWT
-
-El backend fue diseñado inicialmente como un **monolito modular**, manteniendo una separación clara entre responsabilidades y dejando abierta la posibilidad de evolucionar hacia una arquitectura distribuida en el futuro.
+The application manages users, roles, blood centers, blood requests and donations, with authentication and authorization based on JWT.
 
 ---
 
-## 🚀 Tecnologías
+## 🚀 Technologies
 
 * Java
 * Spring Boot
@@ -38,12 +22,101 @@ El backend fue diseñado inicialmente como un **monolito modular**, manteniendo 
 * MySQL
 * Maven
 * Swagger / OpenAPI
+* Lombok
 
 ---
 
-## 🏗️ Arquitectura
+## 📋 Features
 
-El proyecto utiliza una arquitectura organizada por módulos de dominio.
+### Authentication & Security
+
+* User login
+* JWT authentication
+* Protected endpoints
+* Role-based authorization
+* BCrypt password encryption
+* User activation and deactivation
+* Password recovery with expiring tokens
+
+### Users
+
+* User registration
+* Retrieve users
+* Retrieve authenticated user
+* Update user information
+* Activate users
+* Deactivate users
+* Unique email validation
+
+### Roles
+
+* `ADMIN`
+* `HEMOADMIN`
+* `USER`
+
+Users and roles are managed through a many-to-many relationship, allowing a user to have multiple active roles.
+
+### Blood Centers
+
+* Create blood centers
+* Retrieve blood centers
+* Update blood centers
+* Activate blood centers
+* Deactivate blood centers
+* Logical deletion through status
+
+### Blood Requests
+
+* Create blood requests
+* Retrieve blood requests
+* Filter requests by status
+* Update active requests
+* Complete requests
+* Cancel requests
+* Request expiration support
+
+### Donations
+
+* Register a donation
+* Cancel a registered donation
+* Complete a donation
+* View personal donation history
+* View donors associated with a blood request
+* Prevent multiple simultaneous registered donations
+* Recovery period between completed donations
+
+---
+
+## 🏗️ Architecture
+
+The backend follows a modular architecture organized by domain:
+
+```text
+┌─────────────────────────┐
+│       Controller        │
+│        REST API         │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│        Service          │
+│    Business Logic       │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│       Repository        │
+│     Spring Data JPA     │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│         MySQL           │
+│       Database          │
+└─────────────────────────┘
+```
+
+The project is organized by domain:
 
 ```text
 com.donar.api
@@ -62,212 +135,128 @@ com.donar.api
 └── common
 ```
 
-Cada módulo mantiene separadas sus principales responsabilidades:
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Database
-```
-
-Las entidades representan el modelo persistente y los DTOs controlan los datos expuestos y recibidos por la API.
+Each module separates its main responsibilities between controllers, services, repositories, entities and DTOs.
 
 ---
 
-## 🔐 Seguridad
+## 🔐 Authentication & Authorization
 
-La API utiliza **Spring Security + JWT** para autenticar las solicitudes.
+The API uses **Spring Security and JWT**.
 
-El flujo de autenticación es:
+The authentication flow is:
 
 ```text
-POST /api/v1/auth/login
+┌───────────────┐
+│    Client     │
+└───────┬───────┘
+        │
+        │ POST /api/v1/auth/login
+        ▼
+┌────────────────────┐
+│    AuthService     │
+└─────────┬──────────┘
           │
+          │ Validate credentials
           ▼
-      AuthService
+┌────────────────────┐
+│     JwtService     │
+└─────────┬──────────┘
           │
+          │ JWT
           ▼
-   Validación usuario
-          │
-          ▼
-      JwtService
-          │
-          ▼
-         JWT
-          │
-          ▼
-   Cliente / Frontend
+┌────────────────────┐
+│      Client        │
+└─────────┬──────────┘
           │
           │ Authorization: Bearer JWT
           ▼
-JwtAuthenticationFilter
-          │
-          ▼
-CustomUserDetailsService
-          │
-          ▼
-   SecurityContext
-          │
-          ▼
-    @PreAuthorize
+┌────────────────────────────┐
+│ JwtAuthenticationFilter    │
+└─────────────┬──────────────┘
+              ▼
+┌────────────────────────────┐
+│ CustomUserDetailsService   │
+└─────────────┬──────────────┘
+              ▼
+┌────────────────────────────┐
+│      SecurityContext       │
+└─────────────┬──────────────┘
+              ▼
+┌────────────────────────────┐
+│       @PreAuthorize        │
+└────────────────────────────┘
 ```
 
-Las contraseñas se almacenan utilizando **BCrypt**.
+Passwords are encrypted using BCrypt.
 
-Los roles son cargados desde la base de datos durante la autenticación de las solicitudes.
+Roles are loaded from the database when authenticating requests, allowing role changes to take effect without storing authorization data permanently inside the JWT.
 
 ---
 
-## 👥 Roles y permisos
+## 👥 Roles & Permissions
 
-La aplicación utiliza tres roles:
-
-| Rol         | Descripción                                 |
-| ----------- | ------------------------------------------- |
-| `ADMIN`     | Administración completa del sistema         |
-| `HEMOADMIN` | Administración de hemocentros y solicitudes |
-| `USER`      | Funcionalidades destinadas al donante       |
+| Role        | Description                                   |
+| ----------- | --------------------------------------------- |
+| `ADMIN`     | Full system administration                    |
+| `HEMOADMIN` | Blood center and blood request administration |
+| `USER`      | Donor functionality                           |
 
 ### ADMIN
 
-Puede:
+Can manage:
 
-* Gestionar usuarios
-* Gestionar roles
-* Gestionar hemocentros
-* Gestionar solicitudes de sangre
-* Gestionar donaciones
-* Consultar información administrativa
+* Users
+* Roles
+* Blood centers
+* Blood requests
+* Donations
+* Administrative information
 
 ### HEMOADMIN
 
-Puede:
+Can:
 
-* Consultar usuarios
-* Gestionar hemocentros
-* Crear y modificar solicitudes de sangre
-* Gestionar el estado de las donaciones
-
-No posee las operaciones administrativas completas sobre usuarios.
+* View users
+* Manage blood centers
+* Create and update blood requests
+* Manage donation status
 
 ### USER
 
-Puede:
+Can:
 
-* Consultar su información
-* Consultar solicitudes de sangre
-* Registrarse para donar
-* Cancelar una donación registrada
-* Consultar su historial de donaciones
+* View their own information
+* View blood requests
+* Register to donate
+* Cancel a registered donation
+* View their donation history
 
-Los permisos se aplican mediante Spring Security y `@PreAuthorize`.
-
----
-
-## 🩸 Funcionalidades
-
-### Usuarios
-
-* Registro
-* Consulta
-* Actualización
-* Activación
-* Desactivación
-* Consulta del usuario autenticado
-
-El email del usuario es único y no se modifica mediante la actualización normal del perfil.
+Authorization is implemented using Spring Security and `@PreAuthorize`.
 
 ---
 
-### Roles
+## 🩸 Donation Flow
 
-El sistema utiliza una relación muchos-a-muchos:
-
-```text
-User
-  │
-  │
-  ▼
-UserRole
-  │
-  ▼
-Role
-```
-
-Esto permite que un usuario pueda tener múltiples roles activos.
-
----
-
-### Hemocentros
-
-Permite:
-
-* Crear hemocentros
-* Consultar hemocentros
-* Actualizar información
-* Activar
-* Desactivar
-
-Los hemocentros utilizan baja lógica mediante el campo `status`.
-
----
-
-### Solicitudes de sangre
-
-Permite:
-
-* Crear solicitudes
-* Consultar solicitudes
-* Filtrar por estado
-* Modificar solicitudes activas
-* Marcar solicitudes como cumplidas
-* Cancelar solicitudes
-
-Estados disponibles:
-
-```text
-ACTIVE
-FULFILLED
-CANCELLED
-EXPIRED
-```
-
-Flujo de estados:
-
-```text
-ACTIVE
- ├──→ FULFILLED
- ├──→ CANCELLED
- └──→ EXPIRED
-```
-
----
-
-### Donaciones
-
-El sistema contempla el ciclo:
+Donations follow a controlled state flow:
 
 ```text
 REGISTERED
-      │
-      ├──→ CANCELLED
-      │
-      └──→ COMPLETED
+     │
+     ├──────────────► CANCELLED
+     │
+     └──────────────► COMPLETED
 ```
 
-Reglas principales:
+Main business rules:
 
-* Un usuario no puede tener múltiples donaciones `REGISTERED` simultáneamente.
-* Una donación registrada puede ser cancelada por el usuario.
-* Una donación puede ser completada por `ADMIN` o `HEMOADMIN`.
-* Luego de una donación completada existe un período de recuperación antes de volver a donar.
-* Las donaciones no se eliminan físicamente.
+* A user cannot have multiple `REGISTERED` donations simultaneously.
+* A registered donation can be cancelled by the user.
+* A donation can be completed by `ADMIN` or `HEMOADMIN`.
+* Completed donations record the date of donation.
+* A recovery period is required before donating again.
+* Donations are not physically deleted.
 
-El período de recuperación actualmente se configura mediante:
+The recovery period is configurable:
 
 ```properties
 donation.recovery-days=60
@@ -275,51 +264,68 @@ donation.recovery-days=60
 
 ---
 
-### Recuperación de contraseña
+## 🔑 Password Recovery
 
-La API permite:
+The API provides password recovery through:
 
 ```text
 POST /api/v1/auth/forgot-password
 POST /api/v1/auth/reset-password
 ```
 
-Los tokens de recuperación:
+Recovery tokens:
 
-* Son aleatorios.
-* Tienen tiempo de expiración.
-* Solo pueden utilizarse una vez.
-* No revelan si un email existe al solicitar recuperación.
+* Are randomly generated.
+* Have an expiration time.
+* Can only be used once.
+* Do not reveal whether an email exists in the system.
 
 ---
 
-## 📚 Documentación de la API
+## 📚 API Documentation
 
-La API utiliza **Swagger / OpenAPI**.
+The project uses **Swagger / OpenAPI** for API documentation and testing.
 
-Con la aplicación ejecutándose:
+After starting the application:
 
 ```text
 http://localhost:8080/swagger-ui/index.html
 ```
 
-Es posible consultar y probar los endpoints disponibles.
+OpenAPI specification:
 
-Para endpoints protegidos se utiliza autenticación:
+```text
+http://localhost:8080/v3/api-docs
+```
+
+Protected endpoints require:
 
 ```text
 Authorization: Bearer <JWT>
 ```
 
-Swagger está configurado con un esquema `bearerAuth` para facilitar las pruebas.
+Swagger includes a `bearerAuth` security scheme to simplify authenticated API testing.
 
 ---
 
-## ⚙️ Configuración
+## 📦 Requirements
 
-La aplicación utiliza variables de entorno para la información sensible.
+Before starting the application, install:
 
-Ejemplo:
+* Java
+* Maven
+* MySQL
+* Git
+
+Postman is optional and can be used to test the REST API.
+
+---
+
+## ⚙️ Environment Configuration
+
+Sensitive configuration is managed through environment variables.
+
+Example:
 
 ```properties
 spring.datasource.url=${DB_URL}
@@ -330,7 +336,7 @@ jwt.secret=${JWT_SECRET}
 jwt.expiration=86400000
 ```
 
-Variables necesarias:
+Required environment variables:
 
 ```text
 DB_URL
@@ -339,28 +345,29 @@ DB_PASSWORD
 JWT_SECRET
 ```
 
-El archivo `.env.example` contiene una referencia de las variables necesarias sin incluir información sensible.
+The repository includes an `.env.example` file as a reference.
+
+**Do not commit real credentials or JWT secrets to the repository.**
 
 ---
 
-## ▶️ Ejecución
+## ▶️ Run the Application
 
-### Requisitos
-
-* Java
-* Maven
-* MySQL
-* Base de datos configurada
-
-### Clonar el proyecto
+### 1. Clone the repository
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/FedericoBrid/donar-api.git
 ```
 
-### Configurar variables de entorno
+### 2. Move into the project directory
 
-Configurar:
+```bash
+cd donar-api
+```
+
+### 3. Configure environment variables
+
+Configure:
 
 ```text
 DB_URL
@@ -369,21 +376,21 @@ DB_PASSWORD
 JWT_SECRET
 ```
 
-### Ejecutar
+### 4. Run with Maven
 
-Con Maven:
-
-```bash
-./mvnw spring-boot:run
-```
-
-En Windows:
+On Windows:
 
 ```bash
 mvnw.cmd spring-boot:run
 ```
 
-La API estará disponible en:
+On Linux/macOS:
+
+```bash
+./mvnw spring-boot:run
+```
+
+The API will be available at:
 
 ```text
 http://localhost:8080
@@ -397,75 +404,124 @@ http://localhost:8080/swagger-ui/index.html
 
 ---
 
-## 🧪 Pruebas
+## 🧪 Testing
 
-Los principales flujos funcionales fueron probados mediante Postman y Swagger.
+The main application flows have been tested using **Postman and Swagger**.
 
-Entre ellos:
+Tested functionality includes:
 
-* Login exitoso
-* Login con credenciales inválidas
-* Usuarios inactivos
-* Registro de usuarios
-* Asignación de roles
-* Autenticación JWT
-* Rutas protegidas
-* Gestión de hemocentros
-* Gestión de solicitudes
-* Registro de donaciones
-* Cancelación de donaciones
-* Finalización de donaciones
-* Restricción por período de recuperación
-* Historial de donaciones
-* Recuperación de contraseña
-* Tokens de recuperación de un solo uso
+* User registration
+* User login
+* Invalid credentials
+* Inactive users
+* JWT authentication
+* Protected endpoints
+* Role-based authorization
+* User management
+* Role assignment
+* Blood center management
+* Blood request management
+* Donation registration
+* Donation cancellation
+* Donation completion
+* Donation recovery period
+* Donation history
+* Password recovery
+* Expiring password reset tokens
+* Single-use password reset tokens
 
 ---
 
-## 📁 Estructura del proyecto
+## 📁 Project Structure
 
 ```text
 src/
 └── main/
-    └── java/
-        └── com/
-            └── donar/
-                └── api/
-                    ├── auth/
-                    ├── bloodcenter/
-                    ├── bloodrequest/
-                    ├── bloodtype/
-                    ├── common/
-                    ├── donation/
-                    ├── passwordreset/
-                    ├── rhfactor/
-                    ├── role/
-                    ├── security/
-                    ├── user/
-                    └── userrole/
+    ├── java/
+    │   └── com/
+    │       └── donar/
+    │           └── api/
+    │               ├── auth/
+    │               ├── bloodcenter/
+    │               ├── bloodrequest/
+    │               ├── bloodtype/
+    │               ├── common/
+    │               ├── donation/
+    │               ├── passwordreset/
+    │               ├── rhfactor/
+    │               ├── role/
+    │               ├── security/
+    │               ├── user/
+    │               └── userrole/
+    │
+    └── resources/
+        └── application.properties
 ```
 
 ---
 
-## 🔮 Próximas mejoras
+## 🌐 Frontend
 
-Algunas mejoras previstas para futuras versiones:
+The React frontend will be maintained in a **separate repository**, following the same approach used in the Employee Management project.
 
-* Integración con frontend React
-* Expiración automática de solicitudes
-* Migraciones de base de datos con Flyway
-* Configuración específica para producción
-* Dockerización del backend
-* Refresh tokens
-* Mejoras de logging y observabilidad
-* Despliegue de la aplicación
+The complete Donar+ architecture will be:
+
+```text
+┌───────────────────────────────┐
+│            React              │
+│           Frontend            │
+└──────────────┬────────────────┘
+               │
+               │ HTTP / REST
+               ▼
+┌───────────────────────────────┐
+│         Spring Boot           │
+│           Backend             │
+│            :8080              │
+└──────────────┬────────────────┘
+               │
+               │ JPA / JDBC
+               ▼
+┌───────────────────────────────┐
+│             MySQL             │
+│             :3306             │
+└───────────────────────────────┘
+```
+
+Frontend repository:
+
+> Will be added when the React application is completed.
 
 ---
 
-## 👨‍💻 Proyecto
+## 🔮 Future Improvements
 
-**Donar+** es un proyecto de portfolio orientado al desarrollo Full Stack utilizando Java, Spring Boot y React.
+Planned improvements include:
 
-Backend desarrollado con:
+* React frontend
+* Automatic blood request expiration
+* Flyway database migrations
+* Dockerization
+* Refresh tokens
+* Production configuration
+* Improved logging and observability
+* Application deployment
+* Automated testing
 
-**Java + Spring Boot + Spring Security + JWT + MySQL**
+---
+
+## 👨‍💻 Project
+
+Donar+ is a portfolio project focused on **Full Stack development with Java, Spring Boot and React**.
+
+The backend represents a modernization of an earlier PHP/MVC version of the application, introducing a REST API architecture, JWT authentication, role-based authorization and improved separation of responsibilities.
+
+### Backend
+
+**Java · Spring Boot · Spring Security · JWT · MySQL · Swagger/OpenAPI**
+
+### Frontend
+
+**React · Vite**
+
+Frontend and backend are maintained as separate repositories.
