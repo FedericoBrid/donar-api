@@ -38,6 +38,15 @@ public class UserRoleService {
         return userRoleRepository.findByUser_IdAndStatusTrue(userId);
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getActiveRoleNames(Long userId) {
+        return userRoleRepository
+                .findByUser_IdAndStatusTrue(userId)
+                .stream()
+                .map(userRole -> userRole.getRole().getName())
+                .toList();
+    }
+
     @Transactional
     public void assignRole(Long userId, AssignRoleRequest request) {
 

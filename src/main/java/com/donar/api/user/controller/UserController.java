@@ -5,6 +5,7 @@ import com.donar.api.user.dto.UpdateUserRequest;
 import com.donar.api.user.dto.UserResponse;
 import com.donar.api.user.entity.User;
 import com.donar.api.user.service.UserService;
+import com.donar.api.userrole.service.UserRoleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserRoleService userRoleService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -70,11 +72,8 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
-
         Long userId = (Long) authentication.getDetails();
-
         User user = userService.findById(userId);
-
         return toResponse(user);
     }
 
@@ -92,7 +91,8 @@ public class UserController {
                 user.getRhFactor().getName(),
                 user.getStatus(),
                 user.getCreatedAt(),
-                user.getUpdatedAt()
+                user.getUpdatedAt(),
+                userRoleService.getActiveRoleNames(user.getId())
         );
     }
 }

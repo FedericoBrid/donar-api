@@ -4,6 +4,7 @@ import com.donar.api.user.enums.Gender;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record UserResponse(
 
@@ -31,6 +32,8 @@ public record UserResponse(
 
         LocalDateTime createdAt,
 
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        List<String>roles
 ) {
 }
