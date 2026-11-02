@@ -33,6 +33,11 @@ public class DonationService {
     private long recoveryDays;
 
     @Transactional(readOnly = true)
+    public List<Donation> findAll() {
+        return donationRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public List<Donation> findByUserId(Long userId) {
         return donationRepository.findByUser_Id(userId);
     }

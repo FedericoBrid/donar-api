@@ -26,6 +26,15 @@ public class DonationController {
 
     private final DonationService donationService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HEMOADMIN')")
+    public List<DonationResponse> findAll() {
+        return donationService.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DonationResponse create(
