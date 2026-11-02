@@ -8,14 +8,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IDonationRepository extends JpaRepository<Donation, Long> {
+
     List<Donation> findByBloodRequest_Id(Long bloodRequestId);
+
     List<Donation> findByUser_Id(Long userId);
+
     boolean existsByUser_IdAndStatus(
             Long userId,
             DonationStatus status
     );
+
     Optional<Donation> findFirstByUser_IdAndStatusAndDonatedAtIsNotNullOrderByDonatedAtDesc(
             Long userId,
             DonationStatus status
     );
+
+    long countByStatus(DonationStatus status);
 }

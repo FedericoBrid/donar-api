@@ -4,6 +4,7 @@ import com.donar.api.bloodcenter.entity.BloodCenter;
 import com.donar.api.bloodrequest.entity.BloodRequest;
 import com.donar.api.donation.dto.CreateDonationRequest;
 import com.donar.api.donation.dto.DonationResponse;
+import com.donar.api.donation.dto.DonationStatisticsResponse;
 import com.donar.api.donation.dto.MyDonationResponse;
 import com.donar.api.donation.entity.Donation;
 import com.donar.api.donation.service.DonationService;
@@ -134,4 +135,9 @@ public class DonationController {
         );
     }
 
+    @GetMapping("/statistics")
+    @PreAuthorize("isAuthenticated()")
+    public DonationStatisticsResponse getStatistics() {
+        return donationService.getStatistics();
+    }
 }

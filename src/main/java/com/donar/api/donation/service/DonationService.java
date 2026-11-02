@@ -7,6 +7,7 @@ import com.donar.api.common.exception.DuplicateResourceException;
 import com.donar.api.common.exception.InvalidStateException;
 import com.donar.api.common.exception.ResourceNotFoundException;
 import com.donar.api.donation.dto.CreateDonationRequest;
+import com.donar.api.donation.dto.DonationStatisticsResponse;
 import com.donar.api.donation.entity.Donation;
 import com.donar.api.donation.enums.DonationStatus;
 import com.donar.api.donation.repository.IDonationRepository;
@@ -179,5 +180,27 @@ public class DonationService {
                 donation.getDonatedAt().plusDays(recoveryDays);
 
         return !LocalDateTime.now().isBefore(eligibleAt);
+    }
+
+    @Transactional(readOnly = true)
+    public DonationStatisticsResponse getStatistics() {
+
+        long registered = donationRepository.countByStatus(
+                DonationStatus.REGISTERED
+        );
+
+        long completed = donationRepository.countByStatus(
+                DonationStatus.COMPLETED
+        );
+
+        long cancelled = donationRepository.countByStatus(
+                DonationStatus.CANCELLED
+        );
+
+        return new DonationStatisticsResponse(
+                registered,
+                completed,
+                cancelled
+        );
     }
 }
