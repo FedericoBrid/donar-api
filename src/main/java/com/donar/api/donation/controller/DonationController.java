@@ -7,6 +7,7 @@ import com.donar.api.donation.dto.DonationResponse;
 import com.donar.api.donation.dto.MyDonationResponse;
 import com.donar.api.donation.entity.Donation;
 import com.donar.api.donation.service.DonationService;
+import com.donar.api.user.entity.User;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -108,9 +109,14 @@ public class DonationController {
 
     private DonationResponse toResponse(Donation donation) {
 
+        User user = donation.getUser();
+
         return new DonationResponse(
                 donation.getId(),
-                donation.getUser().getId(),
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
                 donation.getBloodRequest().getId(),
                 donation.getStatus(),
                 donation.getRegisteredAt(),
@@ -118,4 +124,5 @@ public class DonationController {
                 donation.getUpdatedAt()
         );
     }
+
 }
