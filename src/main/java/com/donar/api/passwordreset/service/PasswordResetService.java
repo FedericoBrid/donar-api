@@ -1,6 +1,7 @@
 package com.donar.api.passwordreset.service;
 
 import com.donar.api.common.exception.PasswordResetException;
+import com.donar.api.email.service.EmailService;
 import com.donar.api.passwordreset.entity.PasswordReset;
 import com.donar.api.passwordreset.repository.IPasswordResetRepository;
 import com.donar.api.user.entity.User;
@@ -21,6 +22,7 @@ public class PasswordResetService {
     private final IPasswordResetRepository passwordResetRepository;
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -49,6 +51,8 @@ public class PasswordResetService {
         passwordReset.setCreatedAt(LocalDateTime.now());
 
         passwordResetRepository.save(passwordReset);
+
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
     }
 
     @Transactional
