@@ -15,9 +15,14 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     public void sendPasswordResetEmail(String email, String token) {
 
-        String resetUrl = frontendUrl + "/reset-password?token=" + token;
+        String resetUrl = frontendUrl
+                + "/reset-password?token="
+                + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -25,19 +30,23 @@ public class EmailService {
         message.setTo(email);
         message.setSubject("Recuperación de contraseña - Donar+");
 
-        message.setText(
-                "Hola,\n\n" +
-                        "Recibimos una solicitud para restablecer tu contraseña.\n\n" +
-                        "Para continuar, ingresá al siguiente enlace:\n" +
-                        resetUrl + "\n\n" +
-                        "Este enlace vence en 30 minutos y solo puede utilizarse una vez.\n\n" +
-                        "Si no solicitaste este cambio, podés ignorar este correo.\n\n" +
-                        "Equipo Donar+"
-        );
+        message.setText("""
+                Hola,
+
+                Recibimos una solicitud para restablecer tu contraseña de Donar+.
+
+                Para establecer una nueva contraseña, ingresá al siguiente enlace:
+
+                %s
+
+                Este enlace tiene una validez de 30 minutos.
+
+                Si no solicitaste este cambio, podés ignorar este correo.
+
+                Saludos,
+                El equipo de Donar+
+                """.formatted(resetUrl));
 
         mailSender.send(message);
     }
-
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
 }
