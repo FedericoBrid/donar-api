@@ -1,3 +1,4 @@
+
 package com.donar.api.security.config;
 
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,7 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of("http://localhost:3000")
         );
 
         configuration.setAllowedMethods(
@@ -43,10 +44,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }

@@ -38,7 +38,10 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return userRepository.findWithBloodTypeAndRhFactorById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found")
+                );
     }
 
     public User findByEmail(String email) {

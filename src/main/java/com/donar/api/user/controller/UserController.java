@@ -72,8 +72,16 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
+
+        System.out.println("Authentication: " + authentication);
+        System.out.println("Principal: " + authentication.getPrincipal());
+        System.out.println("Details: " + authentication.getDetails());
+        System.out.println("Authorities: " + authentication.getAuthorities());
+
         Long userId = (Long) authentication.getDetails();
+
         User user = userService.findById(userId);
+
         return toResponse(user);
     }
 
